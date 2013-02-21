@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 
 
 public class CheckFilter implements Filter {
-	HashMap<String,Date>d;
 	SimpleCache lruCache;
-	int count =1;
+	long time;
+	Timer t;
 	/**
 	 * @see Filter#destroy()
 	 */
@@ -28,27 +28,47 @@ public class CheckFilter implements Filter {
 			HttpServletRequest req = (HttpServletRequest) request;
 			HttpServletResponse res = (HttpServletResponse) response;
 			String str = req.getRemoteAddr();
-			for (Map.Entry<String,Integer> e : lruCache.getAll()){
+			for (Map.Entry<String,Timer> e : lruCache.getAll()){
 				if(e.getKey().equals(str))
-				{
-					count++;
-					lruCache.map.put(str, count);
+				{	
+					t = e.getValue();
+					e.getValue().count++;
+					lruCache.map.put(str,t);
+					
 					
 				}
 				else
-				{	int counter=1;
-					lruCache.map.put(str, counter);
+				{
+					lruCache.map.remove(e.getKey());
+					lruCache.map.put(str,new Timer());
 				}
 				
 			}
-			if(count>10)
-			{
+			 if(t.count>10)
+			{	
+				time = System.currentTimeMillis();
+				//System.out.println(t.check(time)+"1");	
+				if(t.check(time)==true)
+				{
+					req.getServletContext().setAttribute(str, str);
+					//System.out.println((String) req.getServletContext().getAttribute("IP"));
+					//System.out.println(t.check(time)+"2");	
 				res.sendError(HttpServletResponse.SC_FORBIDDEN, "You Are Perceived as a Threat");
+				}
+				else if(t.check(time)==false)
+				{
+					//System.out.println(t.check(time)+"3");	
+					lruCache.map.put(str,new Timer());
+					//System.out.println(new Timer().count);
+					chain.doFilter(request, response);
+				}
+				
 			}
 			else
 			{
-			// pass the request along the filter chain
-			chain.doFilter(request, response);
+				//System.out.println(t.check(time)+"4");	
+				// pass the request along the filter chain
+				chain.doFilter(request, response);
 			}
 		
 		
@@ -59,8 +79,7 @@ public class CheckFilter implements Filter {
 	 */
 	public void init(FilterConfig fConfig) throws ServletException {
 		try {
-			d = new HashMap<String,Date>();
-			lruCache = new SimpleCache("10.0.0.1",count,100);
+			lruCache = new SimpleCache("127.0.0.1",new Timer(),100);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

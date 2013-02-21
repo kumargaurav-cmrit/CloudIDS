@@ -12,7 +12,15 @@ public class Welcome extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 			response.setContentType("text/html");
 			PrintWriter out = response.getWriter();
-			out.println("You are not a threat");
+			out.println("<!DOCTYPE html/>");
+			out.println("<html>");
+			out.println("<head>");
+			out.println("<title>Application To Be Protected</title>");
+			out.println("</head>");
+			out.println("<body>");
+			out.println("<p>Help Us To Be Safe</p>");
+			out.println("</body>");
+			out.println("</html>");
 	}
 
 }
