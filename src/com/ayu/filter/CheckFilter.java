@@ -15,7 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 public class CheckFilter implements Filter {
 	SimpleCache lruCache;
 	long time;
-	Timer t,t1;
+	Timer 
+	
 	/**
 	 * @see Filter#destroy()
 	 */
