@@ -28,6 +28,12 @@ public class CheckFilter implements Filter {
 			HttpServletRequest req = (HttpServletRequest) request;
 			HttpServletResponse res = (HttpServletResponse) response;
 			String str = req.getRemoteAddr();
+			if(lruCache.map.isEmpty())
+			{
+				//System.out.println("It is empty");
+				lruCache.map.put(str, new Timer());
+				chain.doFilter(request, response);
+			}
 			for (Map.Entry<String,Timer> e : lruCache.getAll()){
 				if(e.getKey().equals(str))
 				{	
@@ -39,7 +45,7 @@ public class CheckFilter implements Filter {
 				}
 				else
 				{
-					lruCache.map.remove(e.getKey());
+					//lruCache.map.remove(e.getKey());
 					lruCache.map.put(str,new Timer());
 				}
 				
@@ -79,7 +85,7 @@ public class CheckFilter implements Filter {
 	 */
 	public void init(FilterConfig fConfig) throws ServletException {
 		try {
-			lruCache = new SimpleCache("127.0.0.1",new Timer(),100);
+			lruCache = new SimpleCache(100);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
