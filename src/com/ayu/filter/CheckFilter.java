@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 public class CheckFilter implements Filter {
 	SimpleCache lruCache;
 	long time;
-	Timer t;
+	Timer t,t1;
 	/**
 	 * @see Filter#destroy()
 	 */
@@ -45,8 +45,16 @@ public class CheckFilter implements Filter {
 				}
 				else
 				{
+					if(lruCache.map.containsKey(str))
+					{
+						t1 = lruCache.map.get(str);
+						t1.count++;
+						lruCache.map.put(str,t1);
+					}
+					else{
 					//lruCache.map.remove(e.getKey());
 					lruCache.map.put(str,new Timer());
+					}
 				}
 				
 			}
